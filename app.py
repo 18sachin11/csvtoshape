@@ -86,23 +86,21 @@ def build_gdf(df: pd.DataFrame, lat_col: str, lon_col: str) -> gpd.GeoDataFrame:
     return gdf
 
 def preview_map(gdf_wgs84: gpd.GeoDataFrame, popup_cols=None):
-    # Center map on mean location
     center_lat = float(gdf_wgs84.geometry.y.mean())
     center_lon = float(gdf_wgs84.geometry.x.mean())
 
     m = folium.Map(location=[center_lat, center_lon], zoom_start=8, control_scale=True)
 
-    # Basemap options
+    # Safe tiles (no attribution error)
     folium.TileLayer("OpenStreetMap", name="OpenStreetMap", show=True).add_to(m)
     folium.TileLayer("CartoDB positron", name="CartoDB Positron", show=False).add_to(m)
-    folium.TileLayer("Stamen Terrain", name="Terrain", show=False).add_to(m)
+    folium.TileLayer("CartoDB dark_matter", name="CartoDB Dark Matter", show=False).add_to(m)
 
     cluster = MarkerCluster(name="Points").add_to(m)
 
-    # Popup config
     if popup_cols:
         popup_cols = [c for c in popup_cols if c in gdf_wgs84.columns and c != "geometry"]
-        popup_cols = popup_cols[:6]  # keep popup small
+        popup_cols = popup_cols[:6]
     else:
         popup_cols = []
 
@@ -112,20 +110,18 @@ def preview_map(gdf_wgs84: gpd.GeoDataFrame, popup_cols=None):
 
         popup_html = ""
         if popup_cols:
-            lines = []
-            for c in popup_cols:
-                val = row.get(c, "")
-                lines.append(f"<b>{c}</b>: {val}")
+            lines = [f"<b>{c}</b>: {row.get(c, '')}" for c in popup_cols]
             popup_html = "<br>".join(lines)
 
         folium.Marker(
             location=[lat, lon],
             popup=folium.Popup(popup_html, max_width=300) if popup_html else None,
-            tooltip="Point"
+            tooltip="Point",
         ).add_to(cluster)
 
     folium.LayerControl(collapsed=True).add_to(m)
     return m
+
 
 # ---------- UI ----------
 uploaded = st.file_uploader("Upload CSV", type=["csv"])
