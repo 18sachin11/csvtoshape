@@ -3,3 +3,5 @@ pandas>=1.5
 geopandas>=0.13
 shapely>=2.0
 pyogrio>=0.7
+folium>=0.14
+streamlit-folium>=0.15
