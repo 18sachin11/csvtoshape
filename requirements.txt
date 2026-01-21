@@ -1,0 +1,5 @@
+streamlit>=1.30
+pandas>=1.5
+geopandas>=0.13
+shapely>=2.0
+pyogrio>=0.7
